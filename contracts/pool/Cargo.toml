@@ -1,0 +1,18 @@
+[package]
+name = "pool"
+version = "0.1.0"
+authors = ["Stellar Development Foundation <info@stellar.org>"]
+license = "MIT"
+edition = "2021"
+rust-version = "1.75.0"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+doctest = false
+
+[dependencies]
+soroban-sdk = { workspace = true }
+
+[dev_dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
