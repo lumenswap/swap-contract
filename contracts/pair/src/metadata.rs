@@ -22,10 +22,6 @@ pub fn read_symbol(e: &Env) -> String {
     get_metadata(e).symbol
 }
 
-pub fn write_metadata(e: &Env, metadata: TokenMetadata) {
-    set_metadata(e, &metadata);
-}
-
 pub fn set_metadata(e: &Env, metadata: &TokenMetadata) {
     e.storage().instance().set(&METADATA_KEY, metadata);
 }

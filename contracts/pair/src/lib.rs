@@ -6,6 +6,7 @@ mod contract;
 mod events;
 mod interface;
 mod metadata;
+mod storage;
 mod storage_types;
 
 pub use crate::contract::Pair;

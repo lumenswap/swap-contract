@@ -1,16 +1,16 @@
-use alloc::borrow::ToOwned;
 use soroban_sdk::{
     contract, contractimpl,
     token::{self, Interface as _, TokenClient as Client},
-    Address, Bytes, Env, String, TryIntoVal,
+    Address, Bytes, Env, String,
 };
 
 use crate::{
     allowance::{read_allowance, spend_allowance, write_allowance},
     balance::{read_balance, receive_balance, spend_balance},
-    events::{self, set_admin},
+    events::{self},
     interface::IPair,
     metadata::{read_decimal, read_name, read_symbol, set_metadata, TokenMetadata},
+    storage::{get_tokens, set_admin, set_tokens},
     storage_types::{INSTANCE_BUMP_AMOUNT, INSTANCE_LIFETIME_THRESHOLD},
 };
 
@@ -26,10 +26,10 @@ pub struct Pair;
 impl IPair for Pair {
     fn initialize(e: Env, token0: Address, token1: Address) {
         let name0 = Client::new(&e, &token0).name();
-        let name1 = Client::new(&e, &token1).name();
+        // let name1 = Client::new(&e, &token1).name();
 
         let symbol0 = Client::new(&e, &token0).symbol();
-        let symbol1 = Client::new(&e, &token1).symbol();
+        // let symbol1 = Client::new(&e, &token1).symbol();
 
         let m = TokenMetadata {
             decimal: 7,
@@ -38,9 +38,9 @@ impl IPair for Pair {
         };
 
         set_metadata(&e, &m);
-
-        // set_admin(&e, admin, new_admin);
-        // set_tokens();
+        // set_admin(&e, &);
+        // set_factory(&e, factory_address);
+        set_tokens(&e, token0, token1);
     }
 
     fn factory(env: Env) -> Address {
@@ -52,22 +52,12 @@ impl IPair for Pair {
         Address::from_string(&a)
     }
 
-    fn token0(env: Env) -> Address {
-        let a = String::from_str(
-            &env,
-            "GA555NCMFLIHKGGM3D6PMUJ2ELKU6RH2ESYOWMQOM2J54LYSDKTRH7N6",
-        );
-
-        Address::from_string(&a)
+    fn token0(e: Env) -> Address {
+        get_tokens(&e).token0
     }
 
-    fn token1(env: Env) -> Address {
-        let a = String::from_str(
-            &env,
-            "GA555NCMFLIHKGGM3D6PMUJ2ELKU6RH2ESYOWMQOM2J54LYSDKTRH7N6",
-        );
-
-        Address::from_string(&a)
+    fn token1(e: Env) -> Address {
+        get_tokens(&e).token1
     }
 
     fn get_reserves(_env: Env) -> (i128, i128, i128) {
