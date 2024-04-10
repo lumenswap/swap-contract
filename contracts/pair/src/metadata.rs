@@ -1,6 +1,6 @@
 use soroban_sdk::{contracttype, Env, String};
 
-use crate::storage_types::METADATA_KEY;
+use crate::storage_types::DataKey;
 
 #[derive(Clone)]
 #[contracttype]
@@ -23,9 +23,9 @@ pub fn read_symbol(e: &Env) -> String {
 }
 
 pub fn set_metadata(e: &Env, metadata: &TokenMetadata) {
-    e.storage().instance().set(&METADATA_KEY, metadata);
+    e.storage().instance().set(&DataKey::Metadata, metadata);
 }
 
 pub fn get_metadata(e: &Env) -> TokenMetadata {
-    e.storage().instance().get(&METADATA_KEY).unwrap()
+    e.storage().instance().get(&DataKey::Metadata).unwrap()
 }

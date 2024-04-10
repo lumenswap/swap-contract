@@ -1,4 +1,4 @@
-use soroban_sdk::{contracttype, symbol_short, Address, String, Symbol};
+use soroban_sdk::{contracttype, Address, String};
 
 pub(crate) const DAY_IN_LEDGERS: u32 = 17280;
 pub(crate) const INSTANCE_BUMP_AMOUNT: u32 = 7 * DAY_IN_LEDGERS;
@@ -6,10 +6,6 @@ pub(crate) const INSTANCE_LIFETIME_THRESHOLD: u32 = INSTANCE_BUMP_AMOUNT - DAY_I
 
 pub(crate) const BALANCE_BUMP_AMOUNT: u32 = 30 * DAY_IN_LEDGERS;
 pub(crate) const BALANCE_LIFETIME_THRESHOLD: u32 = BALANCE_BUMP_AMOUNT - DAY_IN_LEDGERS;
-
-pub const ADMIN_KEY: Symbol = symbol_short!("ADMIN");
-pub const METADATA_KEY: Symbol = symbol_short!("METADATA");
-pub const TOKENS_KEY: Symbol = symbol_short!("TOKENS");
 
 #[derive(Clone)]
 #[contracttype]
@@ -42,9 +38,11 @@ pub struct AllowanceValue {
 #[derive(Clone)]
 #[contracttype]
 pub enum DataKey {
-    Allowance(AllowanceDataKey),
-    Balance(Address),
+    Admin,
+    Tokens,
+    Metadata,
     Nonce(Address),
     State(Address),
-    Admin,
+    Balance(Address),
+    Allowance(AllowanceDataKey),
 }
