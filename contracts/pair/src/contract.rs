@@ -10,7 +10,7 @@ use crate::{
     events::{self},
     interface::IPair,
     metadata::{read_decimal, read_name, read_symbol, set_metadata, TokenMetadata},
-    storage::{get_tokens, set_admin, set_tokens},
+    storage::{get_tokens, set_tokens},
     storage_types::{INSTANCE_BUMP_AMOUNT, INSTANCE_LIFETIME_THRESHOLD},
 };
 
@@ -24,7 +24,7 @@ fn check_nonnegative_amount(amount: i128) {
 pub struct Pair;
 
 impl IPair for Pair {
-    fn initialize(e: Env, token0: Address, token1: Address) {
+    fn init(e: Env, token0: Address, token1: Address) {
         let name0 = Client::new(&e, &token0).name();
         // let name1 = Client::new(&e, &token1).name();
 

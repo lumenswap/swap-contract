@@ -16,7 +16,7 @@ pub struct Tokens {
 
 #[derive(Clone)]
 #[contracttype]
-pub struct TokenMetadata {
+pub struct TokenMeta {
     pub decimal: u32,
     pub name: String,
     pub symbol: String,
