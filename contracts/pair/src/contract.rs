@@ -1,5 +1,5 @@
 use soroban_sdk::{
-    contract, contractimpl, contractmeta,
+    assert_with_error, contract, contractimpl, contractmeta,
     token::{self, Interface as _, TokenClient as Client},
     Address, Bytes, Env, String,
 };
@@ -7,7 +7,7 @@ use soroban_sdk::{
 use crate::{
     allowance::{read_allowance, spend_allowance, write_allowance},
     balance::{read_balance, receive_balance, spend_balance},
-    events,
+    errors, events,
     interface::IPair,
     metadata::{
         get_metadata_result, read_decimal, read_name, read_symbol, set_metadata, TokenMetadata,
@@ -33,11 +33,11 @@ pub struct Pair;
 
 impl IPair for Pair {
     fn init(e: Env, token0: Address, token1: Address, factory: Address) {
-        // TODO: use custom error
-        match get_metadata_result(&e) {
-            Some(_) => panic!("Already initialized"),
-            None => {}
-        }
+        assert_with_error!(
+            &e,
+            get_metadata_result(&e).is_some(),
+            errors::Error::PairAlreadyExist
+        );
 
         let name0 = Client::new(&e, &token0).name();
         let symbol0 = Client::new(&e, &token0).symbol();

@@ -3,6 +3,7 @@
 mod allowance;
 mod balance;
 mod contract;
+mod errors;
 mod events;
 mod interface;
 mod metadata;
