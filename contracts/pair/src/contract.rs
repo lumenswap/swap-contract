@@ -1,5 +1,5 @@
 use soroban_sdk::{
-    contract, contractimpl,
+    contract, contractimpl, contractmeta,
     token::{self, Interface as _, TokenClient as Client},
     Address, Bytes, Env, String,
 };
@@ -7,12 +7,20 @@ use soroban_sdk::{
 use crate::{
     allowance::{read_allowance, spend_allowance, write_allowance},
     balance::{read_balance, receive_balance, spend_balance},
-    events::{self},
+    events,
     interface::IPair,
-    metadata::{read_decimal, read_name, read_symbol, set_metadata, TokenMetadata},
-    storage::{get_tokens, set_tokens},
+    metadata::{
+        get_metadata_result, read_decimal, read_name, read_symbol, set_metadata, TokenMetadata,
+    },
+    storage::{get_factory, get_tokens, set_factory, set_tokens},
     storage_types::{INSTANCE_BUMP_AMOUNT, INSTANCE_LIFETIME_THRESHOLD},
+    string::create_name,
 };
+
+contractmeta!(
+    key = "Description",
+    val = "Lumenswap Protocol - Constant product AMM"
+);
 
 fn check_nonnegative_amount(amount: i128) {
     if amount < 0 {
@@ -20,54 +28,21 @@ fn check_nonnegative_amount(amount: i128) {
     }
 }
 
-pub trait TakeFirstNCharsAndConcat {
-    fn take_first_n_chars(&self, e: &Env, n: usize) -> String;
-    fn concat(&self, e: &Env, other: String) -> String;
-}
-
-impl TakeFirstNCharsAndConcat for String {
-    fn take_first_n_chars(&self, e: &Env, n: usize) -> String {
-        let len = self.len() as usize;
-        let mut slice: [u8; 100] = [0; 100];
-        let min_len = len.min(n);
-        self.copy_into_slice(&mut slice[..len]);
-
-        String::from_str(&e, core::str::from_utf8(&slice[..min_len]).unwrap())
-    }
-
-    fn concat(&self, e: &Env, other: String) -> String {
-        let len_0 = self.len() as usize;
-        let len_1 = other.len() as usize;
-        let mut slice: [u8; 35] = [0; 35];
-        let combined_len = len_0 + len_1;
-
-        self.copy_into_slice(&mut slice[..len_0]);
-        other.copy_into_slice(&mut slice[len_0..combined_len]);
-
-        String::from_str(&e, core::str::from_utf8(&slice[..combined_len]).unwrap())
-    }
-}
-
-fn create_name(e: &Env, symbol_0: &String, symbol_1: &String) -> String {
-    let symbol0 = symbol_0.take_first_n_chars(e, 6);
-    let symbol1 = symbol_1.take_first_n_chars(e, 6);
-
-    let hyphen = String::from_str(&e, "-");
-
-    let end = String::from_str(&e, " Lumenswap LP");
-
-    symbol0.concat(e, hyphen).concat(e, symbol1).concat(e, end)
-}
-
 #[contract]
 pub struct Pair;
 
 impl IPair for Pair {
-    fn init(e: Env, token0: Address, token1: Address) {
-        let name0 = Client::new(&e, &token0).name();
-        let name1 = Client::new(&e, &token1).name();
+    fn init(e: Env, token0: Address, token1: Address, factory: Address) {
+        // TODO: use custom error
+        match get_metadata_result(&e) {
+            Some(_) => panic!("Already initialized"),
+            None => {}
+        }
 
+        let name0 = Client::new(&e, &token0).name();
         let symbol0 = Client::new(&e, &token0).symbol();
+
+        let name1 = Client::new(&e, &token1).name();
         let symbol1 = Client::new(&e, &token1).symbol();
 
         let name = create_name(&e, &name0, &name1);
@@ -80,18 +55,12 @@ impl IPair for Pair {
         };
 
         set_metadata(&e, &m);
-        // set_admin(&e, &);
-        // set_factory(&e, factory_address);
+        set_factory(&e, factory);
         set_tokens(&e, token0, token1);
     }
 
-    fn factory(env: Env) -> Address {
-        let a = String::from_str(
-            &env,
-            "GA555NCMFLIHKGGM3D6PMUJ2ELKU6RH2ESYOWMQOM2J54LYSDKTRH7N6",
-        );
-
-        Address::from_string(&a)
+    fn factory(e: Env) -> Address {
+        get_factory(&e)
     }
 
     fn token0(e: Env) -> Address {
@@ -102,22 +71,27 @@ impl IPair for Pair {
         get_tokens(&e).token1
     }
 
+    // TODO: complete
     fn get_reserves(_env: Env) -> (i128, i128, i128) {
         (1, 2, 3)
     }
 
+    // TODO: complete
     fn price0_cumulative_last(_env: Env) -> i128 {
         123
     }
 
+    // TODO: complete
     fn price1_cumulative_last(_env: Env) -> i128 {
         123
     }
 
+    // TODO: complete
     fn k_last(_: Env) -> i128 {
         123
     }
 
+    // TODO: Complete
     fn mint(_: Env, _to: Address) -> i128 {
         123
     }
@@ -126,10 +100,13 @@ impl IPair for Pair {
     //     (123, 456)
     // }
 
+    // TODO: Complete
     fn swap(_env: Env, _amount0_out: i128, _amount1_out: i128, _to: Address, _data: Bytes) {}
 
+    // TODO: Complete
     fn skim(_env: Env, _to: Address) {}
 
+    // TODO: Complete
     fn sync(_env: Env) {}
 }
 

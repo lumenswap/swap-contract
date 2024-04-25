@@ -25,5 +25,5 @@ pub trait IPair {
 
     fn sync(env: Env);
 
-    fn init(env: Env, token0: Address, token1: Address);
+    fn init(env: Env, token0: Address, token1: Address, factory: Address);
 }

@@ -15,7 +15,9 @@ pub struct Factory;
 
 #[contractimpl]
 impl IFactory for Factory {
-    fn initialize(e: Env, admin: Address, fee: u64) {
+    fn init(e: Env, admin: Address, fee: u64) {
+        // todo: already initiazed check
+        //
         set_admin(&e, admin);
         set_fee(&e, fee);
     }
@@ -49,11 +51,16 @@ impl IFactory for Factory {
     }
 
     fn create_pair(e: Env, token0: Address, token1: Address) -> Address {
-        let pair_exists = get_pair_by_tokens(&e, token0.clone(), token1.clone()).is_ok();
+        let pair_exists = get_pair_by_tokens(&e, token0.clone(), token1.clone()).is_some();
 
         assert_with_error!(&e, pair_exists, errors::Error::PairAlreadyExist);
 
-        let (address, _) = deploy_pair(&e, token0.clone(), token1.clone());
+        let (address, _) = deploy_pair(
+            &e,
+            token0.clone(),
+            token1.clone(),
+            e.current_contract_address(),
+        );
 
         let pair = Pair {
             token0,

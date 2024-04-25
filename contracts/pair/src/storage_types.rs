@@ -41,6 +41,7 @@ pub enum DataKey {
     Admin,
     Tokens,
     Metadata,
+    Factory,
     Nonce(Address),
     State(Address),
     Balance(Address),

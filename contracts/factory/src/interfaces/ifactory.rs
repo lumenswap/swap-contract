@@ -3,7 +3,7 @@ use soroban_sdk::{Address, Env};
 use crate::storage_types::Pair;
 
 pub trait IFactory {
-    fn initialize(e: Env, admin: Address, fee: u64);
+    fn init(e: Env, admin: Address, fee: u64);
     fn get_admin(e: Env) -> Address;
     fn get_fee(e: Env) -> u64;
     fn set_fee(e: Env, new_fee: u64);

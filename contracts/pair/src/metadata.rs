@@ -29,3 +29,7 @@ pub fn set_metadata(e: &Env, metadata: &TokenMetadata) {
 pub fn get_metadata(e: &Env) -> TokenMetadata {
     e.storage().instance().get(&DataKey::Metadata).unwrap()
 }
+
+pub fn get_metadata_result(e: &Env) -> Option<TokenMetadata> {
+    e.storage().instance().get(&DataKey::Metadata)
+}

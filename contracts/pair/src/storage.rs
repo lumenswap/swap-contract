@@ -19,3 +19,11 @@ pub fn set_tokens(e: &Env, token0: Address, token1: Address) {
 pub fn get_tokens(e: &Env) -> Tokens {
     e.storage().instance().get(&DataKey::Tokens).unwrap()
 }
+
+pub fn set_factory(e: &Env, factory: Address) {
+    e.storage().instance().set(&DataKey::Factory, &factory);
+}
+
+pub fn get_factory(e: &Env) -> Address {
+    e.storage().instance().get(&DataKey::Factory).unwrap()
+}

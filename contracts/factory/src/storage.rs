@@ -27,13 +27,8 @@ pub fn set_pair(e: &Env, id: u64, pair: Pair) {
         .set(&DataKey::Pair(pair.token0, pair.token1), &p);
 }
 
-pub fn get_pair_by_tokens(e: &Env, token0: Address, token1: Address) -> Result<Pair, ()> {
-    let p = e.storage().instance().get(&DataKey::Pair(token0, token1));
-
-    match p {
-        Some(x) => Ok(x),
-        None => Err(()),
-    }
+pub fn get_pair_by_tokens(e: &Env, token0: Address, token1: Address) -> Option<Pair> {
+    e.storage().instance().get(&DataKey::Pair(token0, token1))
 }
 
 pub fn get_pair_by_id(e: &Env, id: u64) -> Pair {
