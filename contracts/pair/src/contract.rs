@@ -1,32 +1,27 @@
 use soroban_sdk::{
     assert_with_error, contract, contractimpl, contractmeta,
     token::{self, Interface as _, TokenClient as Client},
-    Address, Bytes, Env, String,
+    Address, Bytes, Env, String, Vec,
 };
 
 use crate::{
     allowance::{read_allowance, spend_allowance, write_allowance},
     balance::{read_balance, receive_balance, spend_balance},
-    errors, events,
+    errors::{self, Error},
+    events,
     interface::IPair,
     metadata::{
         get_metadata_result, read_decimal, read_name, read_symbol, set_metadata, TokenMetadata,
     },
     storage::{get_factory, get_tokens, set_factory, set_tokens},
-    storage_types::{INSTANCE_BUMP_AMOUNT, INSTANCE_LIFETIME_THRESHOLD},
     string::create_name,
+    utils::check_nonnegative_amount,
 };
 
 contractmeta!(
     key = "Description",
     val = "Lumenswap Protocol - Constant product AMM"
 );
-
-fn check_nonnegative_amount(amount: i128) {
-    if amount < 0 {
-        panic!("negative amount is not allowed: {}", amount)
-    }
-}
 
 #[contract]
 pub struct Pair;
@@ -92,8 +87,23 @@ impl IPair for Pair {
     }
 
     // TODO: Complete
-    fn mint(_: Env, _to: Address) -> i128 {
-        123
+    fn mint(e: Env, to: Address, amounts: Vec<i128>, min_amount_out: i128) -> i128 {
+        assert_with_error!(
+            &e,
+            get_metadata_result(&e).is_none(),
+            errors::Error::PairNotInitialized
+        );
+
+        assert_with_error!(&e, amounts.len() != 2, errors::Error::InvalidAmount);
+
+        let reserve0 = get_reserve0();
+        let reserve1 = get_reserve1();
+
+        let balance0 = get_balance0();
+        let balance1 = get_balance1();
+
+        let amount0 = balance0 - reserve0;
+        let amount1 = balance1 - reserve1;
     }
 
     // fn burn(_: Env, _from: Address, _amount: i128) -> (i128, i128) {
@@ -119,10 +129,6 @@ impl token::Interface for Pair {
     /// * `from` - The address holding the balance of tokens to be drawn from.
     /// * `spender` - The address spending the tokens held by `from`.
     fn allowance(e: Env, from: Address, spender: Address) -> i128 {
-        e.storage()
-            .instance()
-            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
-
         read_allowance(&e, from, spender).amount
     }
 
@@ -149,10 +155,6 @@ impl token::Interface for Pair {
 
         check_nonnegative_amount(amount);
 
-        e.storage()
-            .instance()
-            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
-
         write_allowance(&e, from.clone(), spender.clone(), amount, expiration_ledger);
 
         events::approve(&e, from, spender, amount, expiration_ledger);
@@ -165,10 +167,6 @@ impl token::Interface for Pair {
     /// * `id` - The address for which a balance is being queried. If the
     ///   address has no existing balance, returns 0.
     fn balance(e: Env, id: Address) -> i128 {
-        e.storage()
-            .instance()
-            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
-
         read_balance(&e, id)
     }
 
@@ -189,10 +187,6 @@ impl token::Interface for Pair {
         from.require_auth();
 
         check_nonnegative_amount(amount);
-
-        e.storage()
-            .instance()
-            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
 
         spend_balance(&e, from.clone(), amount);
         receive_balance(&e, to.clone(), amount);
@@ -219,10 +213,6 @@ impl token::Interface for Pair {
         spender.require_auth();
 
         check_nonnegative_amount(amount);
-
-        e.storage()
-            .instance()
-            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
 
         spend_allowance(&e, from.clone(), spender, amount);
         spend_balance(&e, from.clone(), amount);
@@ -263,10 +253,6 @@ impl token::Interface for Pair {
 
         check_nonnegative_amount(amount);
 
-        e.storage()
-            .instance()
-            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
-
         spend_allowance(&e, from.clone(), spender, amount);
         spend_balance(&e, from.clone(), amount);
         events::burn(&e, from, amount)
@@ -303,10 +289,6 @@ impl token::Interface for Pair {
         from.require_auth();
 
         check_nonnegative_amount(amount);
-
-        e.storage()
-            .instance()
-            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
 
         spend_balance(&e, from.clone(), amount);
         events::burn(&e, from, amount);

@@ -1,4 +1,7 @@
-use crate::storage_types::{AllowanceDataKey, AllowanceValue, DataKey};
+use crate::{
+    extend::extend_instance_ttl,
+    storage_types::{AllowanceDataKey, AllowanceValue, DataKey},
+};
 use soroban_sdk::{Address, Env};
 
 pub fn read_allowance(e: &Env, from: Address, spender: Address) -> AllowanceValue {
@@ -38,6 +41,8 @@ pub fn write_allowance(
 
     let key = DataKey::Allowance(AllowanceDataKey { from, spender });
     e.storage().temporary().set(&key.clone(), &allowance);
+
+    extend_instance_ttl(&e);
 
     if amount > 0 {
         let live_for = expiration_ledger

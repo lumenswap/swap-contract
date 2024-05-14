@@ -1,4 +1,8 @@
-use crate::storage_types::{DataKey, BALANCE_BUMP_AMOUNT, BALANCE_LIFETIME_THRESHOLD};
+use crate::{
+    extend::{extend_instance_ttl, extend_persistent_ttl},
+    extend::{BUMP_AMOUNT, LIFETIME_THRESHOLD},
+    storage_types::DataKey,
+};
 use soroban_sdk::{Address, Env};
 
 pub fn read_balance(e: &Env, addr: Address) -> i128 {
@@ -7,7 +11,7 @@ pub fn read_balance(e: &Env, addr: Address) -> i128 {
     if let Some(balance) = e.storage().persistent().get::<DataKey, i128>(&key) {
         e.storage()
             .persistent()
-            .extend_ttl(&key, BALANCE_LIFETIME_THRESHOLD, BALANCE_BUMP_AMOUNT);
+            .extend_ttl(&key, LIFETIME_THRESHOLD, BUMP_AMOUNT);
 
         balance
     } else {
@@ -20,9 +24,8 @@ fn write_balance(e: &Env, addr: Address, amount: i128) {
 
     e.storage().persistent().set(&key, &amount);
 
-    e.storage()
-        .persistent()
-        .extend_ttl(&key, BALANCE_LIFETIME_THRESHOLD, BALANCE_BUMP_AMOUNT);
+    extend_instance_ttl(e);
+    extend_persistent_ttl(e, &key);
 }
 
 pub fn receive_balance(e: &Env, addr: Address, amount: i128) {

@@ -5,4 +5,6 @@ use soroban_sdk::contracterror;
 #[repr(u32)]
 pub enum Error {
     PairAlreadyExist = 0,
+    InvalidAmount = 1,
+    PairNotInitialized = 2,
 }

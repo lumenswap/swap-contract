@@ -1,4 +1,4 @@
-use soroban_sdk::{Address, Bytes, Env};
+use soroban_sdk::{Address, Bytes, Env, Vec};
 
 pub trait IPair {
     fn factory(env: Env) -> Address;
@@ -15,7 +15,7 @@ pub trait IPair {
 
     fn k_last(env: Env) -> i128;
 
-    fn mint(env: Env, to: Address) -> i128;
+    fn mint(env: Env, to: Address, amounts: Vec<i128>) -> i128;
 
     // fn burn(env: Env, from: Address, amount: i128) -> (i128, i128);
 
