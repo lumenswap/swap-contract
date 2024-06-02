@@ -6,14 +6,14 @@ use soroban_sdk::{
 
 use crate::{
     allowance::{read_allowance, spend_allowance, write_allowance},
-    balance::{read_balance, receive_balance, spend_balance},
-    errors::{self, Error},
+    balance::{get_balance, read_balance, receive_balance, spend_balance},
+    errors::{self},
     events,
     interface::IPair,
     metadata::{
         get_metadata_result, read_decimal, read_name, read_symbol, set_metadata, TokenMetadata,
     },
-    storage::{get_factory, get_tokens, set_factory, set_tokens},
+    storage::{get_factory, get_reserve_0, get_reserve_1, get_tokens, set_factory, set_tokens},
     string::create_name,
     utils::check_nonnegative_amount,
 };
@@ -67,8 +67,8 @@ impl IPair for Pair {
     }
 
     // TODO: complete
-    fn get_reserves(_env: Env) -> (i128, i128, i128) {
-        (1, 2, 3)
+    fn get_reserves(e: Env) -> (i128, i128) {
+        (get_reserve_0(&e), get_reserve_1(&e))
     }
 
     // TODO: complete
@@ -96,14 +96,18 @@ impl IPair for Pair {
 
         assert_with_error!(&e, amounts.len() != 2, errors::Error::InvalidAmount);
 
-        let reserve0 = get_reserve0();
-        let reserve1 = get_reserve1();
+        let reserve0 = get_reserve_0(&e);
+        let reserve1 = get_reserve_1(&e);
 
-        let balance0 = get_balance0();
-        let balance1 = get_balance1();
+        let tokens = get_tokens(&e);
+
+        let balance0 = get_balance(&e, tokens.token0);
+        let balance1 = get_balance(&e, tokens.token1);
 
         let amount0 = balance0 - reserve0;
         let amount1 = balance1 - reserve1;
+
+        amount0
     }
 
     // fn burn(_: Env, _from: Address, _amount: i128) -> (i128, i128) {

@@ -27,3 +27,11 @@ pub fn set_factory(e: &Env, factory: Address) {
 pub fn get_factory(e: &Env) -> Address {
     e.storage().instance().get(&DataKey::Factory).unwrap()
 }
+
+pub fn get_reserve_0(e: &Env) -> i128 {
+    e.storage().instance().get(&DataKey::Reserve0).unwrap()
+}
+
+pub fn get_reserve_1(e: &Env) -> i128 {
+    e.storage().instance().get(&DataKey::Reserve1).unwrap()
+}

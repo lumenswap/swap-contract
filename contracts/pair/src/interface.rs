@@ -7,7 +7,7 @@ pub trait IPair {
 
     fn token1(env: Env) -> Address;
 
-    fn get_reserves(env: Env) -> (i128, i128, i128);
+    fn get_reserves(env: Env) -> (i128, i128);
 
     fn price0_cumulative_last(env: Env) -> i128;
 
@@ -15,7 +15,7 @@ pub trait IPair {
 
     fn k_last(env: Env) -> i128;
 
-    fn mint(env: Env, to: Address, amounts: Vec<i128>) -> i128;
+    fn mint(env: Env, to: Address, amounts: Vec<i128>, min_amount_out: i128) -> i128;
 
     // fn burn(env: Env, from: Address, amount: i128) -> (i128, i128);
 

@@ -3,7 +3,11 @@ use crate::{
     extend::{BUMP_AMOUNT, LIFETIME_THRESHOLD},
     storage_types::DataKey,
 };
-use soroban_sdk::{Address, Env};
+use soroban_sdk::{token::Client, Address, Env};
+
+pub fn get_balance(e: &Env, contract: Address) -> i128 {
+    Client::new(&e, &contract).balance(&e.current_contract_address())
+}
 
 pub fn read_balance(e: &Env, addr: Address) -> i128 {
     let key = DataKey::Balance(addr);

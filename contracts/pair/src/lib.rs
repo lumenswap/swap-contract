@@ -14,3 +14,6 @@ mod string;
 mod utils;
 
 pub use crate::contract::Pair;
+
+#[cfg(test)]
+mod tests;
